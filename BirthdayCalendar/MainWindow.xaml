@@ -1,0 +1,166 @@
+﻿<Window x:Class="BirthdayCalendar.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BirthdayCalendar"
+        
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="1000"
+        
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True"
+        MouseDown="Window_MouseDown"
+       >
+    <!--#region Приверстке закоментировать код -->
+    <Window.Resources>
+        <local:CustomLetterDayConverter x:Key="CustomLetterDayConverter"/>
+        <Style x:Key="CalendarDayButtonStyle" TargetType= "{x:Type CalendarDayButton}">
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource CustomLetterDayConverter}">
+                            <Binding/>
+                            <Binding Path="DataContext.Dates" RelativeSource="{RelativeSource AncestorType=Calendar}"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Background" Value="#FFC841"></Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <!--#endregion-->
+    <Grid>
+        <Border CornerRadius="30"
+                Background="#3F52B5"
+                BorderBrush="#91A0EF"
+                BorderThickness="2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="35"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="10"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition/>
+                    
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+                
+                <!--#region Верхние кнопки -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="20,0"
+                            >
+                    <Button x:Name="btn_Minimaze"
+                        Style="{StaticResource topButon}"                        
+                        Margin="5"
+                        Click="btn_Minimaze_Click">
+                        <Icon:PackIconMaterial Kind="CollapseAll" Width="15" Height="15"/>
+                    </Button>
+                    <Button x:Name="btn_Maximaize"
+                        Style="{StaticResource topButon}"
+                            Margin="5"
+                            Click="btn_Maximaize_Click"                            
+                            MouseDoubleClick="Window_MouseDoubleClick">
+                        <Icon:PackIconMaterial Kind="ExpandAll" Width="15" Height="15"/>
+                    </Button>
+                    <Button x:Name="btn_Close"
+                        Style="{StaticResource topButon}"                        
+                        Margin="5"
+                        Click="btn_Close_Click">
+                        <Icon:PackIconMaterial Kind="Close" Width="15" Height="15"/>
+                    </Button>
+                </StackPanel>
+                <!--#endregion Верхние кнопки-->
+                
+                <TextBlock Text="Дни рождения сотрудников АО 'СтальМост'"
+                           Grid.Column="1"
+                           Style="{StaticResource tb_light}"/>
+                
+                <DataGrid x:Name="dg_employee"
+                          Grid.Column="1"
+                          Grid.ColumnSpan="1"
+                          Grid.Row="1"
+                          Margin="5"
+                          AlternatingRowBackground="#C2C9EF"
+                          AutoGenerateColumns="False"
+                          ItemsSource="{Binding EmployesObs}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="auto" Header="Ф.И.О" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Width="auto" Header="Дата рождения" Binding="{Binding DateOfBirth, StringFormat='dd.MM.yyyy'}"/>
+                        <DataGridTextColumn Width="150" Header="Должность" Binding="{Binding Position}"/>
+                        <DataGridTextColumn Width="auto" Header="Подразделение" Binding="{Binding Division}"/>
+                        
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!--#region Левое меню -->
+                <Border Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.RowSpan="2"
+                        Background="#91A0EF"
+                       
+                        CornerRadius="0,20,20,30">
+                    <StackPanel>
+                        <TextBlock x:Name="tb_Date"
+                                   Style="{StaticResource tb_dark}"
+                                   Text="{Binding Date, StringFormat='d.MM.yyyy'}"/>
+                        <Border Background="White"
+                                Width="200"
+                                Height="180"
+                                CornerRadius="20"
+                                Margin="5">
+                            <Calendar 
+                                  Background="Transparent"                              
+                                  VerticalAlignment="Center"                                  
+                                  HorizontalAlignment="Center"
+                                  BorderBrush="Transparent"
+                                  SelectionMode="MultipleRange"
+                                  CalendarDayButtonStyle="{DynamicResource CalendarDayButtonStyle}"
+                                  SelectedDate="{Binding Date}">                                
+                               
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectedDatesChanged">
+                                        <i:InvokeCommandAction Command="{Binding ShowEmploeByDate}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>                                 
+                            </Calendar>
+                        </Border>
+                        <Button Content="Показать всех сотрудников"
+                                Style="{StaticResource menuButton}"
+                                Command="{Binding ShowAllEmployees}"/>
+                        <Button Content="Показать Дни рождения месяца"
+                                FontSize="12"
+                                Style="{StaticResource menuButton}"
+                                Command="{Binding ShowEmplotByMonth}"/>
+                        
+                        <TextBlock Style="{StaticResource tb_dark}"
+                                   Text="Поиск по имени"/>
+                        <TextBox Style="{StaticResource textboxData}"
+                                 Text="{Binding SearchName}"/>
+                        <Button Content="Поиск"
+                                
+                                Style="{StaticResource menuButton}"
+                                Command="{Binding SearchNameCommand}"/>
+                        <TextBlock Style="{StaticResource tb_dark}">
+                            <Run Text="Кол-во: "/>
+                            <Run Text="{Binding CountEmployeByView}"/>
+                        </TextBlock>
+                    </StackPanel>                    
+                </Border>
+                <!--#endregion Левое меню-->
+                
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>
